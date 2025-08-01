@@ -1,0 +1,36 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code settings and workspace files
+.vscode/
+*.code-workspace
+
+# Docker-related files
+docker-compose.override.yml
+.env
+.env.local
+.env.*.local
+
+# Ignore data and metadata volumes to avoid pushing large/binary data
+metastore-db/
+warehouse/
+
+# Ignore logs
+logs/
+*.log
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore Python virtual environments if any
+venv/
+env/
+
+# Ignore node modules folder
+node_modules/

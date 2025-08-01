@@ -1,0 +1,23 @@
+FROM apache/hive:3.1.3
+
+USER root
+
+# Install curl and mysql client
+RUN apt-get update && \
+    apt-get install -y curl default-mysql-client && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install MySQL Connector/J driver
+RUN curl -L https://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-j-8.0.33.tar.gz | tar xz && \
+    cp mysql-connector-j-8.0.33/mysql-connector-j-8.0.33.jar /opt/hive/lib/ && \
+    rm -rf mysql-connector-j-8.0.33
+
+# Copy and set permissions for custom start script
+COPY ./start-metastore.sh /start-metastore.sh
+RUN chmod +x /start-metastore.sh
+
+# Switch back to hive user
+USER hive
+
+# Set the entrypoint to the custom start script
+ENTRYPOINT ["/start-metastore.sh"]
