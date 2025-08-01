@@ -1,0 +1,54 @@
+services:
+  spark-notebook:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
+    container_name: spark-notebook
+    ports:
+      - "8888:8888"
+      - "4040:4040"
+      - "4041:4041"
+      - "4042:4042"
+    volumes:
+      - ./workspace:/home/jovyan/workspace
+      - ./warehouse:/home/jovyan/warehouse
+      - ./docker/spark-defaults.conf:/usr/local/spark/conf/spark-defaults.conf
+    environment:
+      - PYSPARK_DRIVER_PYTHON=jupyter
+      - PYSPARK_DRIVER_PYTHON_OPTS=lab
+    working_dir: /home/jovyan/workspace
+    command: start-notebook.sh --NotebookApp.token=''
+    depends_on:
+      - hive-metastore
+
+  hive-metastore:
+    build:
+      context: ./docker
+      dockerfile: Dockerfile.hive
+    container_name: hive-metastore
+    ports:
+      - "9083:9083"
+    volumes:
+      - ./warehouse:/home/jovyan/warehouse               
+      - ./docker/hive-site.xml:/opt/hive/conf/hive-site.xml 
+    depends_on:
+      metastore-db:
+        condition: service_healthy
+
+  metastore-db:
+    image: mysql:8
+    container_name: metastore-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hive_metastore
+      MYSQL_USER: hive
+      MYSQL_PASSWORD: hivepw
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
